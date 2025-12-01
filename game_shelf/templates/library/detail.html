@@ -13,7 +13,7 @@
 
 <!-- Save to library form -->
 {% if user.is_authenticated %}
-<form method="post" action="{% url 'library:add_to_library' game.id %}">
+<form method="post" action="{% url 'library:add_to_library' game.id %}" class="add-to-library-form">
     {% csrf_token %}
     <input type="hidden" name="title" value="{{ game.name }}">
     <input type="hidden" name="cover" value="{{ game.background_image }}">

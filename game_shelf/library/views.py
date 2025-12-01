@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from .models import SavedGame
 from django.contrib import messages
 from types import SimpleNamespace
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 # View for search results from RAWG API
 def search_view(request):
@@ -52,31 +54,28 @@ def my_library(request):
 
 # View for adding game to library, login required
 @login_required
+@require_POST
 def add_to_library(request, rawg_id):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        cover = request.POST.get("cover")
-        status = request.POST.get("status", "want")
+    title = request.POST.get("title")
+    cover = request.POST.get("cover")
+    status = request.POST.get("status", "want")
 
-        # Prevent duplicate saved games
-        saved_game, created = SavedGame.objects.get_or_create(
-            user=request.user,
-            rawg_id=rawg_id,
-            defaults={"title": title, "cover_image": cover, "status": status},
-        )
-        if not created:
-            # If the game already exists, update the status
-            saved_game.status = status
-            saved_game.save()
-            messages.success(request, f"{title} status updated in your library!")
-        else:
-            messages.success(request, f"{title} added to your library!")
+    saved_game, created = SavedGame.objects.get_or_create(
+        user=request.user,
+        rawg_id=rawg_id,
+        defaults={"title": title, "cover_image": cover, "status": status},
+    )
 
-    # redirect back to game detail page
-    game = rawg_game_detail(rawg_id)
-    try:
-        saved_game = SavedGame.objects.get(user=request.user, rawg_id=rawg_id)
-    except SavedGame.DoesNotExist:
-        saved_game = None
+    if not created:
+        saved_game.status = status
+        saved_game.save()
+        message = f"{title} status is updated in your library!"
+    else:
+        message = f"{title} added to your library!"
 
-    return render(request, "library/detail.html", {"game": game, "saved_game": saved_game})
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "rawg_id": rawg_id,
+        "status": saved_game.status,
+    })
