@@ -9,9 +9,22 @@ from types import SimpleNamespace
 def search_view(request):
     query = request.GET.get("q", "")
     results = []
+
     if query:
+        # Convert dicts to objects
         results = [SimpleNamespace(**g) for g in rawg_search(query) if g.get("id")]
-    return render(request, "library/search.html", {"results": results, "query": query})
+
+    # Get IDs of user's saved games to prevent adding duplicates to user's library.
+    if request.user.is_authenticated:
+        user_saved_ids = set(SavedGame.objects.filter(user=request.user).values_list('rawg_id', flat=True))
+    else:
+        user_saved_ids = set()
+        
+    return render(request, "library/search.html", {
+        "results": results, 
+        "query": query,
+        "user_saved_ids": user_saved_ids
+    })
 
 # View for details of game from RAWG API
 def detail_view(request, rawg_id):
