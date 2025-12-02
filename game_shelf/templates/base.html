@@ -50,49 +50,41 @@
             </form>
 
             <!-- Right side: Profile dropdown or Login/Signup -->
-<ul class="navbar-nav ms-3">
+            <ul class="navbar-nav ms-3">
 
-    {% if user.is_authenticated %}
+            <!-- Profile Dropdown -->
+            {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown"
+                        role="button" data-bs-toggle="dropdown">
 
-    <!-- Profile Dropdown -->
-    <li class="nav-item dropdown">
+                        <img src="{{ user.profile.profile_picture.url }}"
+                            class="rounded-circle me-2"
+                            width="32" height="32"
+                            style="object-fit: cover;">
 
-        <!-- Profile photo -->
-        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown"
-           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
 
-            {% if user.profile.profile_picture %}
-                <img src="{{ user.profile.profile_picture.url }}" 
-                     class="rounded-circle me-2" 
-                     alt="Profile" width="32" height="32">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">Logout</a></li>
+                    </ul>
+                </li>
+
             {% else %}
-                <img src="https://via.placeholder.com/32x32.png?text=U"
-                     class="rounded-circle me-2"
-                     alt="Profile">
+
+            <!-- Not logged in -->
+            <li class="nav-item me-2">
+                <a class="btn btn-sm btn-outline-light" href="{% url 'accounts:login' %}">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-sm btn-primary" href="{% url 'accounts:signup' %}">Sign Up</a>
+            </li>
+
+
             {% endif %}
-
-            {{ user.username }}
-        </a>
-
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
-            <li><a class="dropdown-item" href="{% url 'library:my_library' %}">My Library</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">Log Out</a></li>
-        </ul>
-    </li>
-
-    {% else %}
-
-    <!-- Not logged in -->
-    <li class="nav-item me-2">
-        <a class="btn btn-sm btn-outline-light" href="{% url 'accounts:login' %}">Log In</a>
-    </li>
-    <li class="nav-item">
-        <a class="btn btn-sm btn-primary" href="{% url 'accounts:signup' %}">Sign Up</a>
-    </li>
-
-    {% endif %}
 </ul>
 
         </div>
