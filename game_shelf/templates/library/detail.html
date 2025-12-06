@@ -53,22 +53,50 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <strong>{{ review.user.username }}</strong>
-                        <span>
+                        <div class="d-flex align-items-center">
                             {% for s in review.rating|stars %}
                                 {% if s == 'full' %}
-                                    <span class="text-warning">&#9733;</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gold" class="bi bi-star-fill me-1" viewBox="0 0 16 16">
+                                        <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73-3.523-3.356c-.329-.314-.158-.888.283-.95l4.898-.696 2.197-4.454c.197-.398.73-.398.927 0l2.197 4.454 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                                    </svg>
                                 {% elif s == 'three_quarter' %}
-                                    <span class="text-warning">&#9733;</span> <!-- Replace with 3/4 star SVG if desired -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" class="me-1">
+                                        <defs>
+                                            <clipPath id="clip-3q-{{ forloop.counter0 }}">
+                                                <rect width="12" height="16"/>
+                                            </clipPath>
+                                        </defs>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="gold" clip-path="url(#clip-3q-{{ forloop.counter0 }})"/>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="#ccc" opacity="0.4"/>
+                                    </svg>
                                 {% elif s == 'half' %}
-                                    <span class="text-warning">&#189;</span> <!-- placeholder half star -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" class="me-1">
+                                        <defs>
+                                            <clipPath id="clip-half-{{ forloop.counter0 }}">
+                                                <rect width="8" height="16"/>
+                                            </clipPath>
+                                        </defs>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="gold" clip-path="url(#clip-half-{{ forloop.counter0 }})"/>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="#ccc" opacity="0.4"/>
+                                    </svg>
                                 {% elif s == 'quarter' %}
-                                    <span class="text-warning">&#188;</span> <!-- placeholder quarter star -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" class="me-1">
+                                        <defs>
+                                            <clipPath id="clip-quarter-{{ forloop.counter0 }}">
+                                                <rect width="4" height="16"/>
+                                            </clipPath>
+                                        </defs>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="gold" clip-path="url(#clip-quarter-{{ forloop.counter0 }})"/>
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z" fill="#ccc" opacity="0.4"/>
+                                    </svg>
                                 {% else %}
-                                    <span class="text-secondary">&#9733;</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#ccc" class="bi bi-star me-1" viewBox="0 0 16 16">
+                                        <path d="M8 0l2.197 4.454 4.898.696-3.523 3.356.83 4.73L8 13.187 3.611 15.443l.83-4.73-3.523-3.356 4.898-.696L8 0z"/>
+                                    </svg>
                                 {% endif %}
                             {% endfor %}
-                            <small class="ms-1">{{ review.rating }} / 5.00</small>
-                        </span>
+                            <small class="ms-2">{{ review.rating }} / 5</small>
+                        </div>
                     </div>
                     <p class="mb-1">{{ review.comment }}</p>
                     <small class="text-muted">{{ review.created_at|date:"M d, Y H:i" }}</small>

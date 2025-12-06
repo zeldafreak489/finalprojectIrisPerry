@@ -3,32 +3,57 @@ from .utils import rawg_search, rawg_game_detail
 from django.contrib.auth.decorators import login_required
 from .models import SavedGame
 from django.contrib import messages
-from types import SimpleNamespace
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Review
 from .forms import ReviewForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.cache import cache
+from types import SimpleNamespace
 
 # View for search results from RAWG API
 def search_view(request):
     query = request.GET.get("q", "")
+    page = request.GET.get("page", 1)
     results = []
 
     if query:
-        # Convert dicts to objects
-        results = [SimpleNamespace(**g) for g in rawg_search(query) if g.get("id")]
+        # Check the cache first
+        cache_key = f"search_{query.lower()}"
+        cached_results = cache.get(cache_key)
+        if cached_results:
+            data = cached_results
+        else:
+            # fetch from RAWG API
+            data = rawg_search(query)
+            cache.set(cache_key, data, 60*15) # cache for 15 mins
 
-    # Get IDs of user's saved games to prevent adding duplicates to user's library.
+        # convert dicts to objects for template access
+        results = [SimpleNamespace(**g) for g in data if g.get("id")]
+
+    # Paginate the results (12 per page)
+    paginator = Paginator(results, 12)
+    try:
+        paginated_results = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_results = paginator.page(1)
+    except EmptyPage:
+        paginated_results = paginator.page(paginator.num_pages)
+
+    # Get user's saved game IDs
     if request.user.is_authenticated:
-        user_saved_ids = set(SavedGame.objects.filter(user=request.user).values_list('rawg_id', flat=True))
+        user_saved_ids = set(
+            SavedGame.objects.filter(user=request.user).values_list("rawg_id", flat=True)
+        )
     else:
         user_saved_ids = set()
-        
+
     return render(request, "library/search.html", {
-        "results": results, 
+        "results": paginated_results,
         "query": query,
-        "user_saved_ids": user_saved_ids
+        "user_saved_ids": user_saved_ids,
     })
+
 
 # View for details of game from RAWG API
 def detail_view(request, rawg_id):
