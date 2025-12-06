@@ -1,55 +1,95 @@
 {% extends "base.html" %}
+{% load star_filters %}
+
 {% block content %}
-<h1>{{ game.name }}</h1>
 
-{% if game.background_image %}
-<img src="{{ game.background_image }}" alt="{{ game.name }}" style="max-width:300px;">
-{% endif %}
+<div class="row mb-4">
+    <!-- Game Banner -->
+    <div class="col-md-4">
+        {% if game.background_image %}
+            <img src="{{ game.background_image }}" alt="{{ game.name }}" class="img-fluid rounded shadow-sm">
+        {% else %}
+            <img src="https://via.placeholder.com/300x400?text=No+Image" class="img-fluid rounded shadow-sm">
+        {% endif %}
+    </div>
 
-<p>Released: {{ game.released }}</p>
-<p>Platforms:
-  {% for p in game.platforms %}{{ p.platform.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-</p>
+    <!-- Game Info & Library Action -->
+    <div class="col-md-8">
+        <h1 class="fw-bold">{{ game.name }}</h1>
+        <p class="text-muted mb-1"><strong>Released:</strong> {{ game.released }}</p>
+        <p class="text-muted mb-3"><strong>Platforms:</strong>
+            {% for p in game.platforms %}{{ p.platform.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </p>
 
-<!-- Save to library form -->
-{% if user.is_authenticated %}
-<form method="post" action="{% url 'library:add_to_library' game.id %}" class="add-to-library-form">
-    {% csrf_token %}
-    <input type="hidden" name="title" value="{{ game.name }}">
-    <input type="hidden" name="cover" value="{{ game.background_image }}">
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'library:add_to_library' game.id %}" class="add-to-library-form mb-3">
+            {% csrf_token %}
+            <div class="mb-2">
+                <label for="status" class="form-label"><strong>Status:</strong></label>
+                <select name="status" id="status" class="form-select">
+                    <option value="want" {% if saved_game and saved_game.status == 'want' %}selected{% endif %}>Want to Play</option>
+                    <option value="playing" {% if saved_game and saved_game.status == 'playing' %}selected{% endif %}>Currently Playing</option>
+                    <option value="played" {% if saved_game and saved_game.status == 'played' %}selected{% endif %}>Played</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">
+                {% if saved_game %}Update{% else %}Add to Library{% endif %}
+            </button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'accounts:login' %}">Log in</a> to add this game to your library.</p>
+        {% endif %}
+    </div>
+</div>
 
-    <label for="status">Status:</label>
-    <select name="status" id="status" class="form-select mb-2">
-        <option value="want" {% if saved_game and saved_game.status == 'want' %}selected{% endif %}>Want to Play</option>
-        <option value="playing" {% if saved_game and saved_game.status == 'playing' %}selected{% endif %}>Currently Playing</option>
-        <option value="played" {% if saved_game and saved_game.status == 'played' %}selected{% endif %}>Played</option>
-    </select>
+<!-- Reviews Section -->
+<h3 class="mb-3">Reviews</h3>
 
-    <button class="btn btn-primary" type="submit">
-        {% if saved_game %}Update{% else %}Add to Library{% endif %}
-    </button>
-</form>
-{% else %}
-<p><a href="{% url 'accounts:login' %}">Log in</a> to add this game to your library.</p>
-{% endif %}
-
-<h3>Reviews</h3>
 {% if reviews %}
+<div class="row g-3">
     {% for review in reviews %}
-        <div class="border p-2 mb-2">
-            <strong>{{ review.user.username }}</strong> - {{ review.rating }} / 5.00
-            <p>{{ review.comment }}</p>
-            <small>{{ review.created_at }}</small>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 {% if review.user == user %}border-primary{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>{{ review.user.username }}</strong>
+                        <span>
+                            {% for s in review.rating|stars %}
+                                {% if s == 'full' %}
+                                    <span class="text-warning">&#9733;</span>
+                                {% elif s == 'three_quarter' %}
+                                    <span class="text-warning">&#9733;</span> <!-- Replace with 3/4 star SVG if desired -->
+                                {% elif s == 'half' %}
+                                    <span class="text-warning">&#189;</span> <!-- placeholder half star -->
+                                {% elif s == 'quarter' %}
+                                    <span class="text-warning">&#188;</span> <!-- placeholder quarter star -->
+                                {% else %}
+                                    <span class="text-secondary">&#9733;</span>
+                                {% endif %}
+                            {% endfor %}
+                            <small class="ms-1">{{ review.rating }} / 5.00</small>
+                        </span>
+                    </div>
+                    <p class="mb-1">{{ review.comment }}</p>
+                    <small class="text-muted">{{ review.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+            </div>
         </div>
     {% endfor %}
+</div>
 {% else %}
-    <p>No reviews yet.</p>
+<p>No reviews yet.</p>
 {% endif %}
 
+<!-- Add/Edit Review -->
 {% if user.is_authenticated %}
-    <a href="{% url 'library:add_review' game.id %}" class="btn btn-sm btn-outline-primary">Add/Edit Your Review</a>
+<div class="mt-3">
+    <a href="{% url 'library:add_review' game.id %}" class="btn btn-outline-primary">
+        {% if user_review %}Edit Your Review{% else %}Add Your Review{% endif %}
+    </a>
+</div>
 {% else %}
-    <p><a href="{% url 'accounts:login' %}">Log in</a> to add a review</p>
+<p class="mt-3"><a href="{% url 'accounts:login' %}">Log in</a> to add a review.</p>
 {% endif %}
 
 {% endblock %}
