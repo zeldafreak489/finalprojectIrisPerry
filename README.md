@@ -5,64 +5,89 @@
  
 # Game Shelf
  
-Simple overview of use/purpose.
+A web application that allows users to search video games, organize them into a personal game library, and leave ratings and reviews for games.
  
 ## Description
  
-An in-depth paragraph about your project and overview of use.
+GameShelf is a Django-based web application that lets users search for video games using the RAWG Video Games Database API. Users can create accounts, log in, save games to a personal library, track their play status as Want to Play, Currently Playing, or Played. Users can also leave ratings and written reviews for games. The goal of this project is to give gamers a centralized place to track their gaming backlog across multiple platforms.
  
 ## Getting Started
  
 ### Dependencies
  
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
-* List pip install instructions.
+* Python 3.11+
+* Django 5.2.8
+* Requests
+* Pillow (for image uploads)
+* An active RAWG API key
+* Supported OS: Windows 11
+
+Install required packages:
+```
+pip install -r requirements.txt
+```
  
 ### Installing
  
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+* Clone or download the project:
+```
+git clone https://github.com/zeldafreak489/finalprojectIrisPerry
+cd game_shelf
+```
+* Create a .env fils in the project root and add:
+```
+RAWG_API_KEY=your_api_key_here
+```
+* Apply database migrations:
+```
+python manage.py migrate
+```
+* Create a superuser (optional, for admin access):
+```
+python manage.py createsuperuser
+```
  
 ### Executing program
  
-* How to run the program
-* Step-by-step bullets
+To run the development server:
 ```
-code blocks for commands
+python manage.py runserver
 ```
+Steps to use:
+* Open a browser and go to http://127.0.0.1:8000
+* Create an account or log in
+* Use the search bar to find games
+* Add games to your personal library
+* Leave ratings and reviews on games
  
 ## Help
- 
-Any advise for common problems or issues.
+
+If the server won't start, try:
 ```
-command to run if program contains helper info
+python manage.py makemigrations
+python manage.py migrate
 ```
+If static files or images are not displaying, check that:
+* MEDIA_URL and MEDIA_ROOT are correctly set in settings.py
+* Your .env file is loading correctly
  
 ## Authors
- 
-Contributors names and contact info
- 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+
+Iris Perry 
+[LinkedIn](https://www.linkedin.com/in/iris-perry-5933b5137/)
  
 ## Version History
  
 * 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
+    * Added ratings and review system
+    * User profiles with profile pictures
+    * Library status tracking
 * 0.1
     * Initial Release
- 
-## License
- 
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
  
 ## Acknowledgments
  
 Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+* [RAWG Video Games Database API](https://rawg.io/apidocs)
+* [Django Documentation](https://docs.djangoproject.com/en/5.2/)
+* [Bootstrap 5](https://getbootstrap.com/docs/5.3/getting-started/introduction/)
