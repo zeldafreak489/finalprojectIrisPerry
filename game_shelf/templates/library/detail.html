@@ -27,9 +27,9 @@
             <div class="mb-2">
                 <label for="status" class="form-label"><strong>Status:</strong></label>
                 <select name="status" id="status" class="form-select">
-                    <option value="want" {% if saved_game and saved_game.status == 'want' %}selected{% endif %}>Want to Play</option>
-                    <option value="playing" {% if saved_game and saved_game.status == 'playing' %}selected{% endif %}>Currently Playing</option>
-                    <option value="played" {% if saved_game and saved_game.status == 'played' %}selected{% endif %}>Played</option>
+                    <option value="want" {% if saved_game and saved_game.shelf == 'want' %}selected{% endif %}>Want to Play</option>
+                    <option value="playing" {% if saved_game and saved_game.shelf == 'playing' %}selected{% endif %}>Currently Playing</option>
+                    <option value="played" {% if saved_game and saved_game.shelf == 'played' %}selected{% endif %}>Played</option>
                 </select>
             </div>
             <button class="btn btn-primary">
