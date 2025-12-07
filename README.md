@@ -3,7 +3,7 @@
 ### Final Project
  
  
-# Game Shelf
+# GameShelf
  
 A web application that allows users to search video games, organize them into a personal game library, and leave ratings and reviews for games.
  
