@@ -26,8 +26,6 @@ DEBUG = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-
-
 ALLOWED_HOSTS = []
 
 
@@ -66,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'game_shelf.context_processors.current_year'
             ],
         },
     },
