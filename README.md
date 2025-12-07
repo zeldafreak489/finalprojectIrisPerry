@@ -87,7 +87,6 @@ Iris Perry
  
 ## Acknowledgments
  
-Inspiration, code snippets, etc.
 * [RAWG Video Games Database API](https://rawg.io/apidocs)
 * [Django Documentation](https://docs.djangoproject.com/en/5.2/)
 * [Bootstrap 5](https://getbootstrap.com/docs/5.3/getting-started/introduction/)
