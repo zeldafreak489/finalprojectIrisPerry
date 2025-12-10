@@ -1,3 +1,9 @@
+"""
+To address the feedback given on my proposal, I decided to expand this application
+by adding additional features such as a following/friends system, expanded user profiles, and this app, a way to
+track the activities of users and display them on their profile.
+"""
+
 from django.conf import settings
 from django.db import models
 

@@ -95,6 +95,12 @@ from activity.models import Activity
 def user_profile(request, username):
     profile_user = get_object_or_404(User, username=username)
 
+    # Check follow status
+    is_following = Follow.objects.filter(
+        follower=request.user,
+        following=profile_user
+    ).exists()
+
     # Existing counts
     rating_count = Review.objects.filter(user=profile_user).exclude(rating=None).count()
     review_count = Review.objects.filter(user=profile_user).count()
@@ -103,6 +109,20 @@ def user_profile(request, username):
 
     follower_count = Follow.objects.filter(following=profile_user).count()
     following_count = Follow.objects.filter(follower=profile_user).count()
+
+    # Users that profile_user follows
+    following_ids = Follow.objects.filter(
+        follower=profile_user
+    ).values_list("following_id", flat=True)
+
+    # Users that follow profile_user
+    follower_ids = Follow.objects.filter(
+        following=profile_user
+    ).values_list("follower_id", flat=True)
+
+    # Mutual followers = friends
+    friends = User.objects.filter(id__in=set(following_ids) & set(follower_ids))
+    friends = friends.order_by("username")
 
     # Real activity feed
     activities = Activity.objects.filter(user=profile_user).order_by("-created_at")[:20]
@@ -116,6 +136,8 @@ def user_profile(request, username):
         "playing_count": playing_count,
         "completed_count": completed_count,
         "activities": activities,
+        "is_following": is_following,
+        "friends": friends,
     }
 
     return render(request, "accounts/user_profile.html", context)
@@ -133,18 +155,20 @@ def follow_toggle(request, username):
 
     if not created:
         follow.delete()
-        action = "unfollowed"
+        is_following = False
     else:
-        action = "followed"
+        is_following = True
 
-    # If request is AJAX
+    follower_count = Follow.objects.filter(following=target).count()
+
+    # AJAX response
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({
-            "status": action,
-            "follower_count": Follow.objects.filter(following=target).count(),
+            "is_following": is_following,
+            "follower_count": follower_count,
         })
 
-    # Otherwise normal redirect
+    # Normal form fallback
     return redirect("accounts:user_profile", username=target.username)
 
 # View to allow users to search for one another
@@ -152,15 +176,21 @@ def follow_toggle(request, username):
 def user_search(request):
     query = request.GET.get("q", "")
     results = []
+    following_ids = []
 
     if query:
         results = User.objects.filter(
-            Q(username__icontains=query)
+            username__icontains=query
         ).exclude(id=request.user.id)
+
+        # Users you already follow
+        following_ids = Follow.objects.filter(
+            follower=request.user
+        ).values_list("following_id", flat=True)
 
     context = {
         "query": query,
-        "results": results
+        "results": results,
+        "following_ids": list(following_ids),
     }
-
     return render(request, "accounts/user_search.html", context)

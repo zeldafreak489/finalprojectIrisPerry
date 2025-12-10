@@ -18,6 +18,15 @@
                     <span class="me-3"><strong>{{ follower_count }}</strong> Followers</span>
                     <span><strong>{{ following_count }}</strong> Following</span>
                 </div>
+                {% if user != profile_user %}
+                <form id="followForm">
+                    <button id="followBtn"
+                            data-username="{{ profile_user.username }}"
+                            class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %}">
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -136,6 +145,45 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+const followBtn = document.getElementById("followBtn");
+
+if (followBtn) {
+    followBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const username = followBtn.dataset.username;
+
+        fetch(`/accounts/follow/${username}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            followBtn.textContent = data.is_following ? "Unfollow" : "Follow";
+            followBtn.classList.toggle("btn-primary");
+            followBtn.classList.toggle("btn-secondary");
+        });
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 
 {% endblock %}
