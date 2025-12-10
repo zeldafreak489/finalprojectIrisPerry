@@ -24,6 +24,8 @@
         {% if user.is_authenticated %}
             <form method="post" action="{% url 'library:add_to_library' game.id %}" class="add-to-library-form mb-3">
                 {% csrf_token %}
+                <input type="hidden" name="title" value="{{ game.name }}">
+                <input type="hidden" name="cover" value="{{ game.background_image }}">
                 <div class="mb-2">
                     <label for="status" class="form-label"><strong>Status:</strong></label>
                     <select name="status" id="status" class="form-select">
