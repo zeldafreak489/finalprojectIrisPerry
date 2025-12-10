@@ -127,13 +127,13 @@ def add_to_library(request, rawg_id):
     saved_game.shelf = shelf
     saved_game.save()
 
-    # Create activity if needed
-    if activity_type:
-        Activity.objects.create(
-            user=request.user,
-            game_title=title,
-            activity_type=activity_type,
-        )
+    # Create activity
+    Activity.objects.create(
+        user=request.user,
+        game_title=saved_game.title,
+        activity_type="play" if shelf == "playing" else "complete" if shelf == "played" else "add",
+        review=None
+    )
 
     return JsonResponse({
         "success": True,
@@ -170,7 +170,9 @@ def add_review(request, rawg_id):
                     user=request.user,
                     game_title=saved_game.title,
                     activity_type="review",
+                    review=new_review,
                 )
+
             return redirect('library:detail', rawg_id=rawg_id)
     else:
         form = ReviewForm(instance=review)
@@ -194,6 +196,7 @@ def update_shelf(request, rawg_id):
             user=request.user,
             game_title=saved_game.title,
             activity_type="status",
+            shelf=saved_game.shelf,
         )
         return JsonResponse({"success": True, "shelf": saved_game.shelf})
     except SavedGame.DoesNotExist:

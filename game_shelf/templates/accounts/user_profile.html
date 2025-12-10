@@ -60,22 +60,24 @@
     </div>
 
     <!-- ACTIVITY FEED -->
-    <h4 class="mt-4">Recent Activity</h4>
+    <h4 class="mt-4 mb-3">Recent Activity</h4>
 
     {% if activities %}
-    <ul class="list-group mt-2">
+    <ul class="list-group">
         {% for activity in activities %}
-            <li class="list-group-item">
-                {{ activity.user.username }}
-                {% if activity.activity_type == "add" %}
-                    added
-                {% elif activity.activity_type == "status" %}
-                    updated the status of {{ activity.get_shelf_display }}
-                {% elif activity.activity_type == "review" %}
-                    reviewed
-                {% endif %}
-                <strong>{{ activity.game_title }}</strong>
-                <small class="text-muted">({{ activity.created_at|timesince }} ago)</small>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{ activity.user.username }}</div>
+
+                    {% if activity.activity_type == "add" %}
+                        <span>added <strong>{{ activity.game_title }}</strong> to their library</span>
+                    {% elif activity.activity_type == "status" %}
+                        <span>is now playing <span class="badge bg-primary text-white">{{ activity.get_shelf_display }}</span> <strong>{{ activity.game_title }}</strong></span>
+                    {% elif activity.activity_type == "review" %}
+                        <span>reviewed <strong>{{ activity.game_title }}</strong>: <span class="badge bg-warning text-dark">{{ activity.review.rating }} / 5</span></span>
+                    {% endif %}
+                </div>
+                <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
             </li>
         {% endfor %}
     </ul>
@@ -84,8 +86,9 @@
     {% endif %}
 
 
+
     <!-- FRIENDS / FOLLOWING -->
-    <div class="card mb-4 shadow-sm">
+    <div class="card mb-4 shadow-sm mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <strong>Friends</strong>
             <small class="text-muted">({{ friends|length }})</small>
