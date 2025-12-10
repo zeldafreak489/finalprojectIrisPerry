@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -123,25 +124,43 @@ def user_profile(request, username):
 # View for Follow/Unfollow
 @login_required
 def follow_toggle(request, username):
-    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
-        target_user = get_object_or_404(User, username=username)
+    target = get_object_or_404(User, username=username)
 
-        follow, created = Follow.objects.get_or_create(
-            follower=request.user,
-            following=target_user
-        )
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=target
+    )
 
-        if not created:
-            follow.delete()
-            status = "unfollowed"
-        else:
-            status = "followed"
+    if not created:
+        follow.delete()
+        action = "unfollowed"
+    else:
+        action = "followed"
 
-        follower_count = Follow.objects.filter(following=target_user).count()
-
+    # If request is AJAX
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({
-            "status": status,
-            "follower_count": follower_count
+            "status": action,
+            "follower_count": Follow.objects.filter(following=target).count(),
         })
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    # Otherwise normal redirect
+    return redirect("accounts:user_profile", username=target.username)
+
+# View to allow users to search for one another
+@login_required
+def user_search(request):
+    query = request.GET.get("q", "")
+    results = []
+
+    if query:
+        results = User.objects.filter(
+            Q(username__icontains=query)
+        ).exclude(id=request.user.id)
+
+    context = {
+        "query": query,
+        "results": results
+    }
+
+    return render(request, "accounts/user_search.html", context)
