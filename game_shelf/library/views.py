@@ -10,6 +10,7 @@ from .forms import ReviewForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.cache import cache
 from types import SimpleNamespace
+from activity.models import Activity
 
 # View for search results from RAWG API
 def search_view(request):
@@ -116,6 +117,12 @@ def add_to_library(request, rawg_id):
         message = f"{title} shelf updated!"
     else:
         message = f"{title} added to your library!"
+
+    Activity.objects.create(
+        user=request.user,
+        game_title=title,
+        activity_type="add" if created else "status",
+    )
 
     return JsonResponse({
         "success": True,

@@ -9,6 +9,7 @@ from .forms import UserUpdateForm, ProfileUpdateForm
 from .models import Follow
 from django.shortcuts import get_object_or_404
 from library.models import SavedGame, Review
+from activity.models import Activity
 
 # view for signup
 def signup_view(request):
@@ -87,42 +88,37 @@ def account_settings(request):
     return render(request, 'accounts/settings.html', context)
 
 # View for User Profile
+from activity.models import Activity
+
 @login_required
 def user_profile(request, username):
     profile_user = get_object_or_404(User, username=username)
 
+    # Existing counts
+    rating_count = Review.objects.filter(user=profile_user).exclude(rating=None).count()
+    review_count = Review.objects.filter(user=profile_user).count()
+    playing_count = SavedGame.objects.filter(user=profile_user, shelf="playing").count()
+    completed_count = SavedGame.objects.filter(user=profile_user, shelf="played").count()
+
     follower_count = Follow.objects.filter(following=profile_user).count()
     following_count = Follow.objects.filter(follower=profile_user).count()
 
-    is_following = False
-    if request.user.is_authenticated:
-        is_following = Follow.objects.filter(
-            follower=request.user,
-            following=profile_user
-        ).exists()
-
-    # Game stats
-    want_count = SavedGame.objects.filter(user=profile_user, status="want").count()
-    playing_count = SavedGame.objects.filter(user=profile_user, status="playing").count()
-    played_count = SavedGame.objects.filter(user=profile_user, status="played").count()
-
-    # Reviews + Ratings
-    review_count = Review.objects.filter(user=profile_user).count()
-    rating_count = Review.objects.filter(user=profile_user, rating__isnull=False).count()
+    # Real activity feed
+    activities = Activity.objects.filter(user=profile_user).order_by("-created_at")[:20]
 
     context = {
         "profile_user": profile_user,
         "follower_count": follower_count,
         "following_count": following_count,
-        "is_following": is_following,
-        "want_count": want_count,
-        "playing_count": playing_count,
-        "played_count": played_count,
-        "review_count": review_count,
         "rating_count": rating_count,
+        "review_count": review_count,
+        "playing_count": playing_count,
+        "completed_count": completed_count,
+        "activities": activities,
     }
 
     return render(request, "accounts/user_profile.html", context)
+
 
 # View for Follow/Unfollow
 @login_required

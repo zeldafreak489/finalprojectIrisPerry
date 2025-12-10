@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'library',
     'django.contrib.staticfiles',
+    'activity.apps.ActivityConfig',
 ]
 
 MIDDLEWARE = [
