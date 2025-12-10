@@ -111,18 +111,29 @@ def add_to_library(request, rawg_id):
         defaults={"title": title, "cover_image": cover, "shelf": shelf},
     )
 
-    if not created:
-        saved_game.shelf = shelf
-        saved_game.save()
-        message = f"{title} shelf updated!"
-    else:
+    if created:
         message = f"{title} added to your library!"
+        activity_type = "add"
+    else:
+        if saved_game.shelf != shelf:  # only create activity if shelf changed
+            saved_game.shelf = shelf
+            saved_game.save()
+            message = f"{title} shelf updated!"
+            activity_type = "status"
+        else:
+            message = f"{title} shelf unchanged."
+            activity_type = None  # no activity needed
 
-    Activity.objects.create(
-        user=request.user,
-        game_title=title,
-        activity_type="add" if created else "status",
-    )
+    saved_game.shelf = shelf
+    saved_game.save()
+
+    # Create activity if needed
+    if activity_type:
+        Activity.objects.create(
+            user=request.user,
+            game_title=title,
+            activity_type=activity_type,
+        )
 
     return JsonResponse({
         "success": True,
@@ -134,6 +145,12 @@ def add_to_library(request, rawg_id):
 # View for rating and reviewing games
 @login_required
 def add_review(request, rawg_id):
+    # Fetch the saved game if it exists
+    try:
+        saved_game = SavedGame.objects.get(user=request.user, rawg_id=rawg_id)
+    except SavedGame.DoesNotExist:
+        saved_game = None
+
     try:
         review = Review.objects.get(user=request.user, rawg_id=rawg_id)
     except Review.DoesNotExist:
@@ -147,6 +164,13 @@ def add_review(request, rawg_id):
             new_review.rawg_id = rawg_id
             new_review.save()
             messages.success(request, "Your review has been saved!")
+            # Create Activity
+            if saved_game:
+                Activity.objects.create(
+                    user=request.user,
+                    game_title=saved_game.title,
+                    activity_type="review",
+                )
             return redirect('library:detail', rawg_id=rawg_id)
     else:
         form = ReviewForm(instance=review)
@@ -165,6 +189,12 @@ def update_shelf(request, rawg_id):
         saved_game = SavedGame.objects.get(user=request.user, rawg_id=rawg_id)
         saved_game.shelf = shelf
         saved_game.save()
+        # Create activity for status update
+        Activity.objects.create(
+            user=request.user,
+            game_title=saved_game.title,
+            activity_type="status",
+        )
         return JsonResponse({"success": True, "shelf": saved_game.shelf})
     except SavedGame.DoesNotExist:
         return JsonResponse({"success": False, "error": "Game not in library."}, status=404)

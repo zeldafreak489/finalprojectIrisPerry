@@ -66,11 +66,13 @@
     <ul class="list-group mt-2">
         {% for activity in activities %}
             <li class="list-group-item">
-                {{ profile_user.username }}
+                {{ activity.user.username }}
                 {% if activity.activity_type == "add" %}
                     added
                 {% elif activity.activity_type == "status" %}
-                    updated
+                    updated the status of {{ activity.get_shelf_display }}
+                {% elif activity.activity_type == "review" %}
+                    reviewed
                 {% endif %}
                 <strong>{{ activity.game_title }}</strong>
                 <small class="text-muted">({{ activity.created_at|timesince }} ago)</small>
