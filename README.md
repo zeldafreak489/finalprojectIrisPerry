@@ -1,8 +1,3 @@
-### INF601 - Advanced Programming in Python
-### Iris Perry
-### Final Project
- 
- 
 # GameShelf
  
 A web application that allows users to search video games, organize them into a personal game library, and leave ratings and reviews for games.
